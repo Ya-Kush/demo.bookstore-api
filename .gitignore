@@ -2,3 +2,6 @@ Bookstore.sln
 app/bin/
 app/obj/
 app/trash/
+
+test/bin/
+test/obj/
