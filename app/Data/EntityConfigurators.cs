@@ -11,6 +11,7 @@ public static class EntityConfiguratorsExtensions
         bookBuilder.ToTable("Books");
 
         bookBuilder.HasKey(x => x.Id).HasName("Id");
+        bookBuilder.Property(x => x.Id).ValueGeneratedNever().IsRequired();
 
         bookBuilder.HasMany(x => x.Authors).WithMany(x => x.Books);
 
@@ -22,6 +23,7 @@ public static class EntityConfiguratorsExtensions
         authorBuilder.ToTable("Authors");
 
         authorBuilder.HasKey(x => x.Id).HasName("Id");
+        authorBuilder.Property(x => x.Id).ValueGeneratedNever().IsRequired();
 
         authorBuilder.HasMany(x => x.Books).WithMany(x => x.Authors);
 

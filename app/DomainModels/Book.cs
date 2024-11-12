@@ -31,5 +31,14 @@ public sealed class Book : IBookstoreModel
             if (a.Books.Any(x => x.Id == Id) is false) a.AddBooks(this);
         }
     }
+
+    public void RemoveAuthors(params Author[] authors)
+    {
+        foreach (var a in authors)
+        {
+            if (_authors.Any(x => x.Id == a.Id)) _authors.Remove(a);
+            if (a.Books.Any(x => x.Id == Id)) a.RemoveBooks(this);
+        }
+    }
 }
 
