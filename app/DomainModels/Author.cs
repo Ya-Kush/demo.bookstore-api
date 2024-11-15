@@ -9,7 +9,7 @@ public sealed class Author : IBookstoreModel
 
     readonly List<Book> _books = [];
 
-    public IReadOnlyCollection<Book> Books
+    public IEnumerable<Book> Books
     {
         get => _books.AsReadOnly();
         init { _books = [..value]; }
@@ -21,21 +21,31 @@ public sealed class Author : IBookstoreModel
     public static Author New(string firstName, string middleName, string lastName, List<Book> books)
         => new(Guid.NewGuid(), firstName, middleName, lastName) { Books = books };
 
-    public void AddBooks(params Book[] books)
+    public static Author NewWithId(Guid id, string firstName, string middleName, string lastName, List<Book> books)
+        => new(id, firstName, middleName, lastName) { Books = books };
+
+
+    public void AddBook(Book book)
     {
-        foreach (var b in books)
-        {
-            if (_books.Any(x => x.Id == b.Id) is false) _books.Add(b);
-            if (b.Authors.Any(x => x.Id == Id) is false) b.AddAuthors(this);
-        }
+        if (_books.Any(x => x.Id == book.Id)) return;
+
+        _books.Add(book);
+        book.AddAuthor(this);
+    }
+    public void AddBooks(IEnumerable<Book> books)
+    {
+        foreach (var b in books) AddBook(b);
     }
 
-    public void RemoveBooks(params Book[] books)
+    public void RemoveBook(Book book)
     {
-        foreach (var b in books)
-        {
-            if (_books.Any(x => x.Id == b.Id)) _books.Remove(b);
-            if (b.Authors.Any(x => x.Id == Id)) b.RemoveAuthors(this);
-        }
+        if (_books.All(x => x.Id != book.Id)) return;
+
+        _books.Remove(book);
+        book.RemoveAuthor(this);
+    }
+    public void RemoveBooks(IEnumerable<Book> books)
+    {
+        foreach (var b in books) RemoveBook(b);
     }
 }

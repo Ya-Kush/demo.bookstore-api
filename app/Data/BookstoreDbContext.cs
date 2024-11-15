@@ -1,5 +1,6 @@
 using App.DomainModels;
 using Microsoft.EntityFrameworkCore;
+#nullable disable
 
 namespace App.Data;
 

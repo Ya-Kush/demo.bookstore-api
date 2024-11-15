@@ -6,18 +6,16 @@ public static class BookstoreSeedingExtensions
 {
     #region SeedData
     readonly static Book[] _bookSeed = [
-        Book.New(title: "Some Cool Book", edition: "3", price: 49.99,
-            authors: [],
-            publisher: "Some Cool Publisher", released: "2020/06/09"),
+        Book.NewWithIdWithoutAuthors(id: new Guid(0x_00000000, 0000,0000,0000, 0,0,0,0,0,0,0),
+            title: "Some Cool Book", edition: "3", price: 49.99),
 
-        Book.New(title: "The Coolest Book", edition: "3", price: 99.99,
-            authors: [],
-            publisher: "The Coolest Publisher", released: DateTime.UtcNow.ToString("yyyy:/MM:/dd")),
+        Book.NewWithIdWithoutAuthors(id: new Guid(0x_00000000, 0000,0000,0000, 0,0,0,0,0,0,1),
+            title: "The Coolest Book", edition: "3", price: 99.99),
     ];
     readonly static Author[] _authorSeed = [
-        Author.New("Some", "Cool", "Writer", []),
-        Author.New("Some", "Cooler", "Writer", []),
-        Author.New("The", "Coolest", "Writer", [])
+        Author.NewWithId(id: new Guid(0x_10000000, 0000,0000,0000, 0,0,0,0,0,0,0), "Some", "Cool", "Writer", []),
+        Author.NewWithId(id: new Guid(0x_10000000, 0000,0000,0000, 0,0,0,0,0,0,1), "Some", "Cooler", "Writer", []),
+        Author.NewWithId(id: new Guid(0x_10000000, 0000,0000,0000, 0,0,0,0,0,0,2), "The", "Coolest", "Writer", [])
     ];
     #endregion
 
@@ -53,7 +51,8 @@ public static class BookstoreSeedingExtensions
     {
         if (db.Authors.Any() is false)
         {
-            db.Authors.AddRange(_authorSeed);
+            foreach (var a in _authorSeed)
+                db.Authors.Add(a);
             db.SaveChanges();
         }
         return db;
@@ -63,9 +62,9 @@ public static class BookstoreSeedingExtensions
     {
         var books = db.Books.AsEnumerable();
 
-        foreach (var b in books.SkipLast(1)) b.AddAuthors(_authorSeed[0]);
-        books.First().AddAuthors(_authorSeed[1]);
-        books.Last().AddAuthors(_authorSeed[^1]);
+        foreach (var b in books.SkipLast(1)) b.AddAuthor(_authorSeed[0]);
+        books.First().AddAuthor(_authorSeed[1]);
+        books.Last().AddAuthor(_authorSeed[^1]);
 
         db.SaveChanges();
         return db;

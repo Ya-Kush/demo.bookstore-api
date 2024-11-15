@@ -2,7 +2,6 @@ using App.Common;
 using App.EndpointModels;
 
 namespace App.EndpointModelValidators;
-
 public static class AuthorModelValidators
 {
     public static ValidateResult<PostAuthor, string> SimpleValidate(this PostAuthor book) => new(book, x =>

@@ -1,12 +1,12 @@
-using App.EndpointHandlers;
 using App.Data;
+using App.EndpointHandlers;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 var srvs = builder.Services;
 
 srvs.AddDbContext<BookstoreDbContext>(opts => opts.UseInMemoryDatabase("Bookstore"));
-srvs.AddEndpointHandlerContext();
+srvs.AddEndpointHandlers();
 
 srvs.AddEndpointsApiExplorer();
 srvs.AddSwaggerGen();
@@ -20,6 +20,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger().UseSwaggerUI();
 }
 
-app.MapBookstoreEndpointHandlers("/api/v1");
+app.MapEndpointHandlers("/api/v1");
 
 app.Run();

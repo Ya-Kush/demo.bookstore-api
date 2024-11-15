@@ -5,7 +5,7 @@ public interface IReturnedModel { }
 
 public interface IGetEndpointModel : IReturnedModel
 {
-    object? Links { get; set; }
+    object? Links { get; }
 }
 public interface IPostEndpointModel : IReceivedModel { }
 public interface IPutEndpointModel : IReceivedModel { }
