@@ -1,18 +1,21 @@
 using System.Diagnostics.CodeAnalysis;
-using App.EndpointServices;
+using App.Data.Models;
+using App.Endpoints.Services;
 
-namespace App.EndpointHandlers;
+namespace App.Endpoints;
 
 public static class EndpointsConfigurator
 {
     /// <summary>
-    /// Add <see cref="IHttpContextAccessor"/> and scoped <see cref="EndpointHandlerContext"/>'s derivates
+    /// Add <see cref="IHttpContextAccessor"/>, scoped <see cref="EndpointContext"/>
+    /// and repos for <see cref="Author"/> and for <see cref="Book"/>.
     /// </summary>
-    public static void AddEndpointHandlers(this IServiceCollection services)
+    public static void AddEndpointServices(this IServiceCollection services)
     {
         services.AddHttpContextAccessor();
-        services.AddDerivates<EndpointHandlerContext>(withBase: true);
-        services.AddDerivates<EndpointHandlerService>(withBase: false);
+        services.AddScoped<EndpointContext>();
+        services.AddScoped<AuthorRepo>();
+        services.AddScoped<BookRepo>();
     }
 
     static void AddDerivates<T>(this IServiceCollection services, bool withBase)
@@ -24,7 +27,7 @@ public static class EndpointsConfigurator
         foreach (var c in derivates) services.AddScoped(c);
     }
 
-    public static RouteGroupBuilder MapEndpointHandlers(this IEndpointRouteBuilder routeBuilder, [StringSyntax("Route")] string prefix)
+    public static RouteGroupBuilder MapEndpoints(this IEndpointRouteBuilder routeBuilder, [StringSyntax("Route")] string prefix)
     {
         var group = EndpointRouteBuilderExtensions.MapGroup(routeBuilder, prefix).WithName("Api");
 

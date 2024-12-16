@@ -1,7 +1,6 @@
 Bookstore.sln
-app/bin/
-app/obj/
-app/trash/
+plan/
 
-test/bin/
-test/obj/
+*/bin/
+*/obj/
+*/trash/

@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace App.EndpointHandlers;
+namespace App.Endpoints;
 
 public readonly record struct RouteHandlers([StringSyntax("Route")] string Pattern, params Delegate[] Handlers)
 {

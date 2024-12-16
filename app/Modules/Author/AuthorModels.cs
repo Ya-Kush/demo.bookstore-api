@@ -1,11 +1,11 @@
-using App.DomainModels;
+using App.Data.Models;
 
-namespace App.EndpointModels;
+namespace App.Endpoints.Models;
 
-public readonly record struct GetAuthor(Guid Id, string FirstName, string MiddleName, string LastName, object? Links) : IGetEndpointModel;
-public readonly record struct PostAuthor(string FirstName, string MiddleName, string LastName) : IPostEndpointModel;
-public readonly record struct PutAuthor(string FirstName, string MiddleName, string LastName) : IPutEndpointModel;
-public readonly record struct PatchAuthor(string? FirstName, string? MiddleName, string? LastName) : IPatchEndpointModel;
+public readonly record struct GetAuthor(Guid Id, string FirstName, string MiddleName, string LastName, object? Links);
+public readonly record struct PostAuthor(string FirstName, string MiddleName, string LastName);
+public readonly record struct PutAuthor(string FirstName, string MiddleName, string LastName);
+public readonly record struct PatchAuthor(string? FirstName, string? MiddleName, string? LastName);
 
 public static class AuthorConvertorExtensions
 {
@@ -19,10 +19,10 @@ public static class AuthorConvertorExtensions
         => new(author.Id, author.FirstName, author.MiddleName, author.LastName, linkGenerator(author));
 
     public static Author ToAuthor(this PostAuthor postAuthor)
-        => Author.New(postAuthor.FirstName, postAuthor.MiddleName, postAuthor.LastName, []);
+        => Author.New(postAuthor.FirstName, postAuthor.MiddleName, postAuthor.LastName);
 
     public static Author ToAuthor(this PutAuthor postAuthor)
-        => Author.New(postAuthor.FirstName, postAuthor.MiddleName, postAuthor.LastName, []);
+        => Author.New(postAuthor.FirstName, postAuthor.MiddleName, postAuthor.LastName);
 
     public static Author Swap(this Author author, PutAuthor putAuthor)
     {

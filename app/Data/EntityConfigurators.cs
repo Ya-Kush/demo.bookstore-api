@@ -1,4 +1,4 @@
-using App.DomainModels;
+using App.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

@@ -1,11 +1,11 @@
-using App.DomainModels;
+using App.Data.Models;
 
-namespace App.EndpointModels;
+namespace App.Endpoints.Models;
 
-public readonly record struct GetBook(Guid Id, string Title, string Edition, double Price, object? Links) : IGetEndpointModel;
-public readonly record struct PostBook(string Title, string Edition, double Price) : IPostEndpointModel;
-public readonly record struct PutBook(string Title, string Edition, double Price) : IPutEndpointModel;
-public readonly record struct PatchBook(string? Title, string? Edition, double? Price) : IPatchEndpointModel;
+public readonly record struct GetBook(Guid Id, string Title, string Edition, double Price, object? Links);
+public readonly record struct PostBook(string Title, string Edition, double Price);
+public readonly record struct PutBook(string Title, string Edition, double Price);
+public readonly record struct PatchBook(string? Title, string? Edition, double? Price);
 
 public static class BookModelConvertorExtensions
 {
@@ -19,10 +19,10 @@ public static class BookModelConvertorExtensions
         => new(book.Id, book.Title, book.Edition, book.Price, linkGenerator(book));
 
     public static Book ToBook(this PostBook postBook)
-        => Book.NewWithoutAuthors(postBook.Title, postBook.Edition, postBook.Price);
+        => Book.New(postBook.Title, postBook.Edition, postBook.Price);
 
     public static Book ToBook(this PutBook putBook)
-        => Book.NewWithoutAuthors(putBook.Title, putBook.Edition, putBook.Price);
+        => Book.New(putBook.Title, putBook.Edition, putBook.Price);
 
     public static Book Swap(this Book book, PutBook putBook)
     {

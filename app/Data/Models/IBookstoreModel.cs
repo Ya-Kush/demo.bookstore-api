@@ -1,4 +1,4 @@
-namespace App.DomainModels;
+namespace App.Data.Models;
 
 public interface IBookstoreModel
 {

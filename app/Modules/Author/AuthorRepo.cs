@@ -1,14 +1,14 @@
 using App.Common;
 using App.Data;
-using App.DomainModels;
-using App.EndpointModels;
-using App.EndpointModelValidators;
+using App.Data.Models;
+using App.Endpoints.Models;
+using App.Endpoints.Models.Validators;
 using Microsoft.EntityFrameworkCore;
 using static App.Common.Res;
 
-namespace App.EndpointServices;
+namespace App.Endpoints.Services;
 
-public sealed class AuthorHandlerService(EndpointHandlerContext context, BookstoreDbContext bookstoreDbContext) : EndpointHandlerService(context)
+public sealed class AuthorRepo(BookstoreDbContext bookstoreDbContext)
 {
     BookstoreDbContext DbContext { get; } = bookstoreDbContext;
 
@@ -70,7 +70,7 @@ public sealed class AuthorHandlerService(EndpointHandlerContext context, Booksto
 
     IRes<Author> SaveNewAuthorWithId(Guid id, PutAuthor putAuthor)
     {
-        var author = Author.NewWithId(id, putAuthor.FirstName, putAuthor.MiddleName, putAuthor.LastName, []);
+        var author = new Author(id, putAuthor.FirstName, putAuthor.MiddleName, putAuthor.LastName);
         DbContext.Authors.Add(author);
         DbContext.SaveChanges();
         return Ok(author);

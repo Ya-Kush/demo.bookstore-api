@@ -1,7 +1,6 @@
 using App.Common;
-using App.EndpointModels;
 
-namespace App.EndpointModelValidators;
+namespace App.Endpoints.Models.Validators;
 
 public static class BookModelValidators
 {

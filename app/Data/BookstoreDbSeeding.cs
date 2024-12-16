@@ -1,4 +1,4 @@
-using App.DomainModels;
+using App.Data.Models;
 
 namespace App.Data;
 
@@ -6,16 +6,16 @@ public static class BookstoreSeedingExtensions
 {
     #region SeedData
     readonly static Book[] _bookSeed = [
-        Book.NewWithIdWithoutAuthors(id: new Guid(0x_00000000, 0000,0000,0000, 0,0,0,0,0,0,0),
+        new(id: new Guid(0x_00000000, 0000,0000,0000, 0,0,0,0,0,0,0),
             title: "Some Cool Book", edition: "3", price: 49.99),
 
-        Book.NewWithIdWithoutAuthors(id: new Guid(0x_00000000, 0000,0000,0000, 0,0,0,0,0,0,1),
+        new(id: new Guid(0x_00000000, 0000,0000,0000, 0,0,0,0,0,0,1),
             title: "The Coolest Book", edition: "3", price: 99.99),
     ];
     readonly static Author[] _authorSeed = [
-        Author.NewWithId(id: new Guid(0x_10000000, 0000,0000,0000, 0,0,0,0,0,0,0), "Some", "Cool", "Writer", []),
-        Author.NewWithId(id: new Guid(0x_10000000, 0000,0000,0000, 0,0,0,0,0,0,1), "Some", "Cooler", "Writer", []),
-        Author.NewWithId(id: new Guid(0x_10000000, 0000,0000,0000, 0,0,0,0,0,0,2), "The", "Coolest", "Writer", [])
+        new(id: new Guid(0x_10000000, 0000,0000,0000, 0,0,0,0,0,0,0), "Some", "Cool", "Writer"),
+        new(id: new Guid(0x_10000000, 0000,0000,0000, 0,0,0,0,0,0,1), "Some", "Cooler", "Writer"),
+        new(id: new Guid(0x_10000000, 0000,0000,0000, 0,0,0,0,0,0,2), "The", "Coolest", "Writer"),
     ];
     #endregion
 

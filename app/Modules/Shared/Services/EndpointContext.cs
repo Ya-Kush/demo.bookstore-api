@@ -1,8 +1,8 @@
 using System.Reflection;
 
-namespace App.EndpointServices;
+namespace App.Endpoints.Services;
 
-public class EndpointHandlerContext(IHttpContextAccessor hca, LinkGenerator lg)
+public class EndpointContext(IHttpContextAccessor hca, LinkGenerator lg)
 {
     public HttpContext HttpContext { get; } = hca.HttpContext ?? throw new NullReferenceException();
     public LinkGenerator LinkGenerator { get; } = lg;

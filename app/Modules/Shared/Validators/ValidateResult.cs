@@ -1,4 +1,4 @@
-namespace App.EndpointModelValidators;
+namespace App.Endpoints.Models.Validators;
 
 public readonly struct ValidateResult<T,TError>(T? value, Func<T?, IEnumerable<TError>> validator)
 {

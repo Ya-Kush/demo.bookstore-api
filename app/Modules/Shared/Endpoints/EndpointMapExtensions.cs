@@ -1,9 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
-namespace App.EndpointHandlers;
+namespace App.Endpoints;
 
-public static class RouteMapExtensions
+public static class EndpointMapExtensions
 {
     public static T MapSub<T, TR>(this T routeBuilder, params Func<T, TR>[] funcs)
         where T : IEndpointRouteBuilder
