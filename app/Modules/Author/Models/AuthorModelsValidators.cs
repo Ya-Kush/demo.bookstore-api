@@ -1,4 +1,4 @@
-using App.Common;
+using App.Common.Extensions;
 
 namespace App.Endpoints.Models.Validators;
 
