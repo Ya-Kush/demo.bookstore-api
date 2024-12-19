@@ -1,47 +1,92 @@
 namespace App.Common;
 
-public interface IRes<T>;
-
-public readonly record struct Ok<T>(T Value) : IRes<T>;
-public readonly record struct Created<T>(T Value) : IRes<T>;
-public readonly record struct Updated<T>(T Value) : IRes<T>;
-
-public readonly record struct Fail<T>(T? Value) : IRes<T>;
-public readonly record struct NotFound<T>(T? Value) : IRes<T>;
-
-public readonly record struct Error<T>(T? Value, IEnumerable<string> Errors) : IRes<T>;
-public readonly record struct Error<T,TE>(T? Value, IEnumerable<TE> Errors) : IRes<T>;
-
-public static class Res
+public readonly record struct Res<T>
 {
-    public static IRes<T> Ok<T>(T value) => new Ok<T>(value);
-    public static IRes<T> Created<T>(T value) => new Created<T>(value);
-    public static IRes<T> Updated<T>(T value) => new Updated<T>(value);
+    readonly T? _value;
+    readonly Error? _error;
 
-    public static IRes<T> Fail<T>(T? value) => new Fail<T>(value);
-    public static IRes<T> NotFound<T>(T? value) => new NotFound<T>(value);
+    public T Value => IsOk ? _value! : throw new InvalidOperationException();
+    public Error Error => IsFail ? _error! : throw new InvalidOperationException();
 
-    public static IRes<T> Error<T>(IEnumerable<string> errors) => new Error<T,string>(default, errors);
-    public static IRes<T> Error<T>(T? value, IEnumerable<string> errors) => new Error<T,string>(value, errors);
-    public static IRes<T> Error<T,TE>(IEnumerable<TE> errors) => new Error<T,TE>(default, errors);
-    public static IRes<T> Error<T,TE>(T? value, IEnumerable<TE> errors) => new Error<T,TE>(value, errors);
+    public bool IsOk => _error is null && _value is not null;
+    public bool IsFail => _error is not null;
+
+
+    public Res() => throw new InvalidOperationException("Attempt to create an instance of Res<T> by parameterless constructor");
+    Res(T value) => _value = value;
+    Res(Error error) => _error = error;
+
+    public static Res<T> Ok(T val) => new(val);
+    public static Res<T> Fail(Error err) => new(err);
+    public static Res<T> FailIfNull(T? val, Error err) => val is null ? Fail(err) : Ok(val);
+    public static Res<T> FailIfNull(T? val, Func<Error> errGetter) => val is null ? Fail(errGetter()) : Ok(val);
+    static Res<T> FailIfNull(T? val) => FailIfNull(val, new NullError());
+
+
+    public T ValueOr(T or) => IsOk ? Value : or;
+    public T ValueOr(Func<T> or) => IsOk ? Value : or();
+
+    public Res<T> Tap(Action<T> ok, Action<Error>? fail = default)
+    {
+        if (IsOk) ok(Value);
+        if (fail is not null && IsFail) fail(Error);
+        return this;
+    }
+
+    public TOut Match<TOut>(Func<T,TOut> ok, Func<Error,TOut> fail) => IsOk
+        ? ok(Value)
+        : fail(Error);
+
+    public Res<TOut> Bind<TOut>(Func<T,TOut?> ok) => IsOk
+        ? Res<TOut>.FailIfNull(ok(Value))
+        : Res<TOut>.Fail(Error);
+
+    public Res<TOut> Bind<TOut>(Func<T,TOut?> ok, Func<Error,Res<TOut>> fail) => IsOk
+        ? Res<TOut>.FailIfNull(ok(Value))
+        : fail(Error);
+
+    public Res<TOut> Map<TOut>(Func<T,Res<TOut>> ok) => IsOk
+        ? ok(Value)
+        : Res<TOut>.Fail(Error);
+
+    public Res<TOut> Map<TOut>(Func<T,Res<TOut>> ok, Func<Error,Res<TOut>> fail) => IsOk
+        ? ok(Value)
+        : fail(Error);
+
+
+    public static implicit operator Res<T>(T? val) => FailIfNull(val);
+    public static implicit operator Res<T>(Error err) => Fail(err);
+    public static implicit operator Res(Res<T> res) => res.Match(_ => Res.Ok(), Res.Fail);
 }
 
-public static class ResExtensions
+public readonly record struct Res
 {
-    static TR? If<T, TT, TR>(this IRes<T> res, Func<TT, TR> then, Func<IRes<T>, TR?>? otherwise = null)
-        where TT : IRes<T>
-        => res is TT target
-        ? then(target)
-        : otherwise is null ? default : otherwise(res);
+    readonly Error? _error;
 
-    public static TR? IfOk<T,TR>(this IRes<T> res, Func<Ok<T>, TR> then, Func<IRes<T>, TR?>? otherwise = null) => If(res, then, otherwise);
-    public static TR? IfCreated<T,TR>(this IRes<T> res, Func<Created<T>, TR> then, Func<IRes<T>, TR?>? otherwise = null) => If(res, then, otherwise);
-    public static TR? IfUpdated<T,TR>(this IRes<T> res, Func<Updated<T>, TR> then, Func<IRes<T>, TR?>? otherwise = null) => If(res, then, otherwise);
+    public Error Error => IsFail ? _error! : throw new InvalidOperationException();
 
-    public static TR? IfFail<T, TR>(this IRes<T> res, Func<Fail<T>, TR> then, Func<IRes<T>, TR?>? otherwise = null) => If(res, then, otherwise);
-    public static TR? IfNotFound<T,TR>(this IRes<T> res, Func<NotFound<T>, TR> then, Func<IRes<T>, TR?>? otherwise = null) => If(res, then, otherwise);
+    public bool IsOk => _error is null;
+    public bool IsFail => _error is not null;
 
-    public static TR? IfError<T,TR>(this IRes<T> res, Func<Error<T>, TR> then, Func<IRes<T>, TR?>? otherwise = null) => If(res, then, otherwise);
-    public static TR? IfError<T,TE,TR>(this IRes<T> res, Func<Error<T,TE>, TR> then, Func<IRes<T>, TR?>? otherwise = null) => If(res, then, otherwise);
+
+    public Res() => throw new InvalidOperationException("Attempt to create an instance of Res by parameterless constructor");
+    Res(Error? error) => _error = error;
+
+    public static Res Ok() => new(default);
+    public static Res Fail(Error err) => new(err);
+    public static Res FailIfFalse(bool isOk, Error err) => isOk is false ? Fail(err) : Ok();
+    public static Res FailIfFalse(bool isOk, Func<Error> errGetter) => isOk is false ? Fail(errGetter()) : Ok();
+
+    public Res Tap(Action ok, Action<Error>? fail = default)
+    {
+        if (IsOk) ok();
+        if (fail is not null && IsFail) fail(Error);
+        return this;
+    }
+
+    public TOut Match<TOut>(Func<TOut> ok, Func<Error,TOut> fail)
+        => IsOk ? ok() : fail(Error);
+
+
+    public static implicit operator Res(Error err) => Fail(err);
 }
