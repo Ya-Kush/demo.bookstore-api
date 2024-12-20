@@ -4,17 +4,21 @@ using App.Middlewares;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+#region Service Configuration
 var srvs = builder.Services;
 
 srvs.AddProblemDetails();
 srvs.AddExceptionHandler<GlobalExceptionHandlingMiddleware>();
 
 srvs.AddDbContext<BookstoreDbContext>(opts => opts.UseInMemoryDatabase("Bookstore"));
-srvs.AddEndpointServices();
+srvs.AddBookstoreEndpointServices();
 
 srvs.AddEndpointsApiExplorer();
 srvs.AddSwaggerGen();
+#endregion Service Configuration
 
+#region Application Configuration
 var app = builder.Build();
 
 app.UseExceptionHandler();
@@ -28,6 +32,7 @@ if (app.Environment.IsDevelopment())
     app.MapGet("", _ => throw new Exception("Test Throwing"));
 }
 
-app.MapEndpoints("/api/v1");
+app.MapBookstoreEndpoints("/api/v1");
 
 app.Run();
+#endregion Application Configuration

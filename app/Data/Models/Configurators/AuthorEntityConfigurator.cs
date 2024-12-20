@@ -1,23 +1,15 @@
-using App.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace App.Data;
+namespace App.Data.Models.Configurators;
 
-public static class EntityConfiguratorsExtensions
+public sealed class AuthorEntityConfigurator : IEntityTypeConfiguration<Author>
 {
-    public static EntityTypeBuilder<Book> Configure(this EntityTypeBuilder<Book> bookBuilder)
-    {
-        bookBuilder.ToTable("Books");
+    public void Configure(EntityTypeBuilder<Author> builder) => builder.Configure();
+}
 
-        bookBuilder.HasKey(x => x.Id).HasName("Id");
-        bookBuilder.Property(x => x.Id).ValueGeneratedNever().IsRequired();
-
-        bookBuilder.HasMany(x => x.Authors).WithMany(x => x.Books);
-
-        return bookBuilder;
-    }
-
+public static class AuthorEntityConfiguratorExtensions
+{
     public static EntityTypeBuilder<Author> Configure(this EntityTypeBuilder<Author> authorBuilder)
     {
         authorBuilder.ToTable("Authors");

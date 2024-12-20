@@ -10,7 +10,7 @@ public static class EndpointsConfigurator
     /// Add <see cref="IHttpContextAccessor"/>, scoped <see cref="EndpointContext"/>
     /// and repos for <see cref="Author"/> and for <see cref="Book"/>.
     /// </summary>
-    public static void AddEndpointServices(this IServiceCollection services)
+    public static void AddBookstoreEndpointServices(this IServiceCollection services)
     {
         services.AddHttpContextAccessor();
         services.AddScoped<EndpointContext>();
@@ -27,7 +27,7 @@ public static class EndpointsConfigurator
         foreach (var c in derivates) services.AddScoped(c);
     }
 
-    public static RouteGroupBuilder MapEndpoints(this IEndpointRouteBuilder routeBuilder, [StringSyntax("Route")] string prefix)
+    public static RouteGroupBuilder MapBookstoreEndpoints(this IEndpointRouteBuilder routeBuilder, [StringSyntax("Route")] string prefix)
     {
         var group = EndpointRouteBuilderExtensions.MapGroup(routeBuilder, prefix).WithName("Api");
 
