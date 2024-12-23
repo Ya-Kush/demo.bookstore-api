@@ -2,6 +2,7 @@ using App.Data;
 using App.Endpoints.Models;
 using App.Endpoints.Services;
 using App.Services.Errors;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using static Microsoft.AspNetCore.Http.TypedResults;
 
@@ -19,9 +20,9 @@ public static class BookEndpoints
     }
 
     #region Handlers
-    public static IResult GetBooks(BookRepo bookRepo, EndpointContext context)
+    public static Ok<Set<GetBook>> GetBooks(BookRepo bookRepo, EndpointContext context)
     {
-        return Ok(new { data = bookRepo.Books.Untrack().ToGetBooks(context) });
+        return Ok(Set.New(bookRepo.Books.Untrack().ToGetBooks(context)));
     }
 
     public static IResult PostBook([FromBody] PostBook postBook, BookRepo bookRepo, EndpointContext context)

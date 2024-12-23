@@ -2,6 +2,7 @@ using App.Data;
 using App.Endpoints.Models;
 using App.Endpoints.Services;
 using App.Services.Errors;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using static Microsoft.AspNetCore.Http.TypedResults;
 
@@ -20,9 +21,9 @@ public static class AuthorEndpoints
     }
 
     #region Handlers
-    public static IResult GetAuthors(AuthorRepo authorRepo, EndpointContext context)
+    public static Ok<Set<GetAuthor>> GetAuthors(AuthorRepo authorRepo, EndpointContext context)
     {
-        return Ok(new { data = authorRepo.Authors.Untrack().ToGetAuthors(context) });
+        return Ok(Set.New(authorRepo.Authors.Untrack().ToGetAuthors(context)));
     }
 
     public static IResult PostAuthor([FromBody] PostAuthor postAuthor, AuthorRepo authorRepo, EndpointContext context)
@@ -68,7 +69,7 @@ public static class AuthorEndpoints
     {
         var res = authorRepo.FindAuthorBooks(authorId);
         return res.Match<IResult>(
-            books => Ok(books.ToGetBooks(context)),
+            books => Ok(new { data = books.ToGetBooks(context) }),
             err => NotFound());
     }
 

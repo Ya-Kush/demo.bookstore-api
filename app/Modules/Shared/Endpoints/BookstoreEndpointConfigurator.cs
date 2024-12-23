@@ -4,7 +4,7 @@ using App.Endpoints.Services;
 
 namespace App.Endpoints;
 
-public static class EndpointsConfigurator
+public static class BookstoreEndpointsConfigurator
 {
     /// <summary>
     /// Add <see cref="IHttpContextAccessor"/>, scoped <see cref="EndpointContext"/>
@@ -18,6 +18,16 @@ public static class EndpointsConfigurator
         services.AddScoped<BookRepo>();
     }
 
+    public static RouteGroupBuilder MapBookstoreEndpoints(this IEndpointRouteBuilder routeBuilder, [StringSyntax("Route")] string prefix)
+    {
+        var group = routeBuilder.MapGroup(prefix).WithName("Api");
+
+        group.MapBooks();
+        group.MapAuthors();
+
+        return group;
+    }
+
     static void AddDerivates<T>(this IServiceCollection services, bool withBase)
     {
         var tbase = typeof(T);
@@ -25,15 +35,5 @@ public static class EndpointsConfigurator
             .Where(t => t.IsAssignableTo(tbase) && (withBase || t.Equals(tbase) is false));
 
         foreach (var c in derivates) services.AddScoped(c);
-    }
-
-    public static RouteGroupBuilder MapBookstoreEndpoints(this IEndpointRouteBuilder routeBuilder, [StringSyntax("Route")] string prefix)
-    {
-        var group = EndpointRouteBuilderExtensions.MapGroup(routeBuilder, prefix).WithName("Api");
-
-        group.MapBooks();
-        group.MapAuthors();
-
-        return group;
     }
 }

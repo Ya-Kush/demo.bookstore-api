@@ -13,10 +13,11 @@ public static class AuthorEnpointsExtenstions
 
     public static GetAuthor ToGetAuthor(this Author author, EndpointContext context)
     {
-        return author.ToGetAuthor(new
-        {
-            self = context.GetLink(AuthorEndpoints.GetAuthor, new { authorId = author.Id }),
-            books = context.GetLink(AuthorEndpoints.GetAuthorBooks, new { authorId = author.Id }),
-        });
+        return author.ToGetAuthor(
+            new(Rel: "self",
+                Href: context.GetLink(AuthorEndpoints.GetAuthor, new { authorId = author.Id })),
+            new(Rel: "books",
+                Href: context.GetLink(AuthorEndpoints.GetAuthorBooks, new { authorId = author.Id }))
+        );
     }
 }
