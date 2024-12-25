@@ -30,7 +30,7 @@ public static class BookEndpoints
         var res = bookRepo.SaveNewBook(postBook);
         return res.Match<IResult>(
             book => Created(
-                uri: context.GetLink(GetBook, new { book.Id }),
+                uri: context.GetLink(GetBook, new { bookId = book.Id }),
                 value: book.ToGetBook(context)),
             err => BadRequest(err.Message));
     }

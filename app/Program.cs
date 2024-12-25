@@ -28,8 +28,6 @@ app.PopulateBookstore();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger().UseSwaggerUI();
-
-    app.MapGet("", _ => throw new Exception("Test Throwing"));
 }
 
 app.MapBookstoreEndpoints("/api/v1");

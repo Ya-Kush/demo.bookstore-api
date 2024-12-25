@@ -2,7 +2,7 @@ using App.Data.Models;
 
 namespace App.Endpoints.Models;
 
-public readonly record struct GetBook(Guid Id, string Title, string Edition, double Price, IEnumerable<Link> _links);
+public readonly record struct GetBook(Guid Id, string Title, string Edition, GetPublisher? Publisher, double Price, IEnumerable<Link> _links);
 public readonly record struct PostBook(string Title, string Edition, double Price);
 public readonly record struct PutBook(string Title, string Edition, double Price);
 public readonly record struct PatchBook(string? Title, string? Edition, double? Price);
@@ -10,10 +10,10 @@ public readonly record struct PatchBook(string? Title, string? Edition, double? 
 public static class BookModelConvertorExtensions
 {
     public static GetBook ToGetBook(this Book book, params Link[] links)
-        => new(book.Id, book.Title, book.Edition, book.Price, links);
+        => new(book.Id, book.Title, book.Edition, book.Publisher?.ToGetPublisher(), book.Price, links);
 
     public static GetBook ToGetBook(this Book book, Func<Book, IEnumerable<Link>> linkGenerator)
-        => new(book.Id, book.Title, book.Edition, book.Price, linkGenerator(book));
+        => new(book.Id, book.Title, book.Edition, book.Publisher?.ToGetPublisher(), book.Price, linkGenerator(book));
 
     public static Book ToBook(this PostBook postBook)
         => Book.New(postBook.Title, postBook.Edition, postBook.Price);

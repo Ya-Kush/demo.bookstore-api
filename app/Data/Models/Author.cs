@@ -8,7 +8,11 @@ public sealed class Author : IBookstoreModel
     public string LastName { get; set; }
 
     readonly List<Book> _books = [];
-    public IEnumerable<Book> Books => _books;
+    public IEnumerable<Book> Books
+    {
+        get => _books;
+        init => _books = [..value];
+    }
 
     internal Author(Guid id, string firstName, string middleName, string lastName)
         => (Id, FirstName, MiddleName, LastName) = (id, firstName, middleName, lastName);

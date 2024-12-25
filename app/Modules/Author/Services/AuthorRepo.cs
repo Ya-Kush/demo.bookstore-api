@@ -33,19 +33,6 @@ public sealed class AuthorRepo(BookstoreDbContext bookstoreDbContext)
             : val.Error;
     }
 
-    public Res<Author> SaveAuthor(Guid authorId, PutAuthor putAuthor)
-    {
-        var authorRes = FindAuthor(authorId);
-        var valRes = putAuthor.SimpleValidate();
-
-        if (authorRes.IsFail && valRes.IsInvalid) return authorRes.Error.Concat(valRes.Error);
-        else if (authorRes.IsFail) return authorRes.Error;
-        else if (valRes.IsInvalid) return valRes.Error;
-        else return authorRes.Match(
-            book => ReplaceAuthorDate(book, putAuthor.ToAuthor()),
-            _ => SaveNewAuthorWithId(authorId, putAuthor));
-    }
-
     public Res<Author> UpdateAuthor(Guid authorId, PatchAuthor patchAuthor)
     {
         var authorRes = FindAuthor(authorId);
@@ -75,7 +62,8 @@ public sealed class AuthorRepo(BookstoreDbContext bookstoreDbContext)
     public Res AddBookToAuthor(Guid authorId, Guid bookId)
     {
         var authorRes = FindAuthorWithBooks(authorId);
-        var bookRes = DbContext.Books.Include(b => b.Authors)
+        var bookRes = DbContext.Books
+            .Include(b => b.Authors)
             .FirstOrDefault(b => b.Id == bookId)
             .ToRes(ifNull: () => new NotFoundError());
 
@@ -90,7 +78,8 @@ public sealed class AuthorRepo(BookstoreDbContext bookstoreDbContext)
     public Res RemoveBookFromAuthor(Guid authorId, Guid bookId)
     {
         var authorRes = FindAuthorWithBooks(authorId);
-        var bookRes = DbContext.Books.Include(b => b.Authors)
+        var bookRes = DbContext.Books
+            .Include(b => b.Authors)
             .FirstOrDefault(b => b.Id == bookId)
             .ToRes(ifNull: () => new NotFoundError());
 
@@ -103,14 +92,6 @@ public sealed class AuthorRepo(BookstoreDbContext bookstoreDbContext)
     }
 
 
-    Res<Author> SaveNewAuthorWithId(Guid authorId, PutAuthor putAuthor)
-    {
-        var author = new Author(authorId, putAuthor.FirstName, putAuthor.MiddleName, putAuthor.LastName);
-        DbContext.Authors.Add(author);
-        DbContext.SaveChanges();
-        return author;
-    }
-
     Res<Author> SaveAuthor(Author author)
     {
         var entry = DbContext.Authors.Add(author);
@@ -122,20 +103,6 @@ public sealed class AuthorRepo(BookstoreDbContext bookstoreDbContext)
     {
         author.Update(patchAuthor);
         DbContext.SaveChanges();
-        return author;
-    }
-
-    Res<Author> ReplaceAuthorDate(Author author, Author newAuthor)
-    {
-        author.FirstName = newAuthor.FirstName;
-        author.MiddleName = newAuthor.MiddleName;
-        author.LastName = newAuthor.LastName;
-
-        author.RemoveBooks(author.Books);
-        author.AddBooks(newAuthor.Books);
-
-        DbContext.SaveChanges();
-
         return author;
     }
 }

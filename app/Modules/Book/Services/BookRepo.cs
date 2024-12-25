@@ -33,19 +33,6 @@ public sealed class BookRepo(BookstoreDbContext bookstoreDbContext)
             : valRes.Error;
     }
 
-    public Res<Book> SaveBook(Guid bookId, PutBook putBook)
-    {
-        var bookRes = FindBook(bookId);
-        var valRes = putBook.SimpleValidate();
-
-        if (bookRes.IsFail && valRes.IsInvalid) return bookRes.Error.Concat(valRes.Error);
-        else if (bookRes.IsFail) return bookRes.Error;
-        else if (valRes.IsInvalid) return valRes.Error;
-        else return bookRes.Match(
-            book => ReplaceBookData(book, putBook.ToBook()),
-            _ => SaveNewBookWithId(bookId, putBook));
-    }
-
     public Res<Book> UpdateBook(Guid bookId, PatchBook patchBook)
     {
         var bookRes = FindBook(bookId);
@@ -105,14 +92,6 @@ public sealed class BookRepo(BookstoreDbContext bookstoreDbContext)
     }
 
 
-    Res<Book> SaveNewBookWithId(Guid bookId, PutBook putBook)
-    {
-        var book = new Book(bookId, putBook.Title, putBook.Edition, putBook.Price);
-        DbContext.Books.Add(book);
-        DbContext.SaveChanges();
-        return book;
-    }
-
     Res<Book> SaveBook(Book book)
     {
         var entry = DbContext.Books.Add(book);
@@ -124,20 +103,6 @@ public sealed class BookRepo(BookstoreDbContext bookstoreDbContext)
     {
         book.Update(patchBook);
         DbContext.SaveChanges();
-        return book;
-    }
-
-    Res<Book> ReplaceBookData(Book book, Book newBook)
-    {
-        book.Title = newBook.Title;
-        book.Edition = newBook.Edition;
-        book.Price = newBook.Price;
-
-        book.RemoveAuthors(book.Authors);
-        book.AddAuthors(newBook.Authors);
-
-        DbContext.SaveChanges();
-
         return book;
     }
 }

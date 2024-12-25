@@ -15,9 +15,9 @@ public static class BookEndpointsExtenstions
     {
         return book.ToGetBook(
             new(Rel: "self",
-                Href: context.GetLink(BookEndpoints.GetBook, new { authorId = book.Id })),
+                Href: context.GetLink(BookEndpoints.GetBook, new { bookId = book.Id })),
             new(Rel: "authors",
-                Href: context.GetLink(BookEndpoints.GetBookAuthors, new { authorId = book.Id }))
+                Href: context.GetLink(BookEndpoints.GetBookAuthors, new { bookId = book.Id }))
         );
     }
 }

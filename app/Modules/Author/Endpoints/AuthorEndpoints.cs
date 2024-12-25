@@ -31,7 +31,7 @@ public static class AuthorEndpoints
         var res = authorRepo.SaveNewAuthor(postAuthor);
         return res.Match<IResult>(
             author => Created(
-                uri: context.GetLink(GetAuthor, new { author.Id }),
+                uri: context.GetLink(GetAuthor, new { authorId = author.Id }),
                 value: author.ToGetAuthor(context)),
             err => BadRequest(err.Message));
     }

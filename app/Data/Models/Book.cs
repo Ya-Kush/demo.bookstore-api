@@ -7,14 +7,29 @@ public sealed class Book : IBookstoreModel
     public string Edition { get; set; }
     public double Price { get; set; }
 
+    Publisher? _publisher = null;
+    public Publisher Publisher
+    {
+        get => _publisher ?? Publisher.Default;
+        set => _publisher = value;
+    }
+
     readonly List<Author> _authors = [];
-    public IEnumerable<Author> Authors => _authors;
+    public IEnumerable<Author> Authors
+    {
+        get => _authors;
+        init => _authors = [..value];
+    }
 
     internal Book(Guid id, string title, string edition, double price)
         => (Id, Title, Edition, Price) = (id, title, edition, price);
 
-    public static Book New(string title, string edition, double price)
-        => new(Guid.NewGuid(), title, edition, price);
+    public static Book New(string title, string edition, double price, Publisher? publisher = null)
+    {
+        var book = new Book(Guid.NewGuid(), title, edition, price);
+        if (publisher is not null) book.Publisher = publisher;
+        return book;
+    }
 
     public Book WithAuthors(IEnumerable<Author> authors)
     {
@@ -31,6 +46,7 @@ public sealed class Book : IBookstoreModel
         return ha && hb;
     }
 
+    public void UnsetPublisher() => _publisher = null;
 
     public void AddAuthors(IEnumerable<Author> authors)
     {
