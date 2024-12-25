@@ -1,4 +1,4 @@
-using App.Data;
+using App.Data.Extensions;
 using App.Endpoints.Models;
 using App.Endpoints.Services;
 using App.Services.Errors;
@@ -10,14 +10,13 @@ namespace App.Endpoints;
 
 public static class AuthorEndpoints
 {
-    public static T MapAuthors<T>(this T routeBuilder) where T : IEndpointRouteBuilder
+    public static RouteGroupBuilder MapAuthors(this IEndpointRouteBuilder routeBuilder)
     {
-        return routeBuilder.MapSub(x => x.Map(
-        // "/some-part", () => "request"), x => x.Map(
-        "/authors", GetAuthors, PostAuthor).MapSub(x => x.Map(
-            "/{authorId:guid}", GetAuthor, PatchAuthor, DeleteAuthor).MapSub(x => x.Map(
-                "/books", GetAuthorBooks).MapSub(x => x.Map(
-                    "/{bookId:guid}", PutAuthorBook, DeleteAuthorBook)))));
+        return routeBuilder.MapGroup("/authors").WithTags("Author").MapRouteHandlers(
+            new("", GetAuthors, PostAuthor),
+            new("/{authorId:guid}", GetAuthor, PatchAuthor, DeleteAuthor),
+            new("/{authorId:guid}/books", GetAuthorBooks),
+            new("/{authorId:guid}/books/{bookId:guid}", PutAuthorBook, DeleteAuthorBook));
     }
 
     #region Handlers

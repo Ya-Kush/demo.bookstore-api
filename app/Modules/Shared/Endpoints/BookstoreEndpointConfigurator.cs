@@ -20,10 +20,11 @@ public static class BookstoreEndpointsConfigurator
 
     public static RouteGroupBuilder MapBookstoreEndpoints(this IEndpointRouteBuilder routeBuilder, [StringSyntax("Route")] string prefix)
     {
-        var group = routeBuilder.MapGroup(prefix).WithName("Api");
+        var group = routeBuilder.MapGroup(prefix).WithTags("Api");
 
-        group.MapBooks();
         group.MapAuthors();
+        group.MapBooks();
+        group.MapPublishers();
 
         return group;
     }

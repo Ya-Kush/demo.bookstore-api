@@ -1,4 +1,4 @@
-using App.Data;
+using App.Data.Extensions;
 using App.Endpoints.Models;
 using App.Endpoints.Services;
 using App.Services.Errors;
@@ -12,7 +12,7 @@ public static class BookEndpoints
 {
     public static RouteGroupBuilder MapBooks(this IEndpointRouteBuilder routeBuilder)
     {
-        return routeBuilder.MapGroup("/books").MapRouteHandlers(
+        return routeBuilder.MapGroup("/books").WithTags("Book").MapRouteHandlers(
             new("", GetBooks, PostBook),
             new("/{bookId:guid}", GetBook, PatchBook, DeleteBook),
             new("/{bookId:guid}/authors", GetBookAuthors),

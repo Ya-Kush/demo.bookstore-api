@@ -5,20 +5,6 @@ namespace App.Endpoints;
 
 public static class EndpointMapExtensions
 {
-    public static T MapSub<T, TR>(this T routeBuilder, params Func<T, TR>[] funcs)
-        where T : IEndpointRouteBuilder
-        where TR : IEndpointRouteBuilder
-    {
-        foreach (var f in funcs) f(routeBuilder);
-        return routeBuilder;
-    }
-    public static RouteGroupBuilder Map<T>(this T routeBuilder, [StringSyntax("Route")] string pattern, params Delegate[] handlers) where T : IEndpointRouteBuilder
-    {
-        var group = routeBuilder.MapGroup(pattern);
-        group.MapHandlers("", handlers);
-        return group;
-    }
-
     public static T MapRouteHandlers<T>(this T routeBuilder, params RouteHandlers[] routeHandlers) where T : IEndpointRouteBuilder
     {
         foreach (var (pattern, handlers) in routeHandlers) routeBuilder.MapHandlers(pattern, handlers);
