@@ -9,7 +9,7 @@ public static class GetPublishers
 {
     public readonly record struct Response(IEnumerable<SimplePublisherResponse> Data);
 
-    public static IResult Handler(BookstoreDbContext db, EndpointContext context)
+    public static IResult Handle(BookstoreDbContext db, EndpointContext context)
     {
         return Ok(new Response(db.Publishers.ToSimplePublisherResponses(context)));
     }

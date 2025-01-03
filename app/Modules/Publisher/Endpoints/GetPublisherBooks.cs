@@ -11,7 +11,7 @@ public static class GetPublisherBooks
 {
     public readonly record struct Response(IEnumerable<GetBook> Data);
 
-    public static IResult Handler(Guid publisherId, BookstoreDbContext db, EndpointContext context)
+    public static IResult Handle(Guid publisherId, BookstoreDbContext db, EndpointContext context)
     {
         var pub = db.Publishers.Untrack().Include(p => p.Books).FirstOrDefault(p => p.Id == publisherId);
         return Ok(new Response(pub?.Books.ToGetBooks(context) ?? []));

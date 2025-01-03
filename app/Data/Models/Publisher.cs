@@ -1,3 +1,6 @@
+using App.Common;
+using App.Common.Extensions;
+
 namespace App.Data.Models;
 
 public sealed class Publisher : IBookstoreModel
@@ -23,8 +26,10 @@ public sealed class Publisher : IBookstoreModel
     internal Publisher(Guid id, string name)
         => (Id, _name) = (id, name);
 
-    public static Publisher New(string name)
-        => new(Guid.NewGuid(), name);
+    public static Res<Publisher> New(string name)
+        => name.IsNullOrWhiteSpace()
+        ? new Error("Wrong name format")
+        : new Publisher(Guid.NewGuid(), name);
 
     public Publisher WithBooks(IEnumerable<Book> books)
     {
