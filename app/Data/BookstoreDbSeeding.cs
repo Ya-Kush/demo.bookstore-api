@@ -12,13 +12,12 @@ public static class BookstoreSeedingExtensions
     ];
     readonly static Book[] _bookSeed = [
         new(id: new Guid(0x_00000000, 0000,0000,0000, 0,0,0,0,0,0,0),
-            title: "Some Cool Book", edition: "3", price: 49.99){ Publisher = Publisher.Default },
+            title: "Some Cool Book", edition: "3", price: 49.99),
 
         new(id: new Guid(0x_00000000, 0000,0000,0000, 0,0,0,0,0,0,1),
-            title: "The Coolest Book", edition: "3", price: 99.99){ Publisher = Publisher.Default },
+            title: "The Coolest Book", edition: "3", price: 99.99),
     ];
     readonly static Publisher[] _publishers = [
-        Publisher.Default,
         new(id: new Guid(0x_00000000, 1000,0000,0000, 0,0,0,0,0,0,0), name: "Some Cool Publisher"),
     ];
     #endregion
@@ -64,7 +63,9 @@ public static class BookstoreSeedingExtensions
         books.First().AddAuthor(_authorSeed[1]);
         books.Last().AddAuthor(_authorSeed[^1]);
 
-        _publishers[1].AddBooks(books.Skip(1));
+        // _publishers[0].AddBooks(books.Skip(1));
+        foreach (var b in books.Skip(1))
+            b.Publisher = _publishers[0];
 
         return db;
     }

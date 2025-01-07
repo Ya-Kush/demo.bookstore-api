@@ -18,6 +18,7 @@ public static class BookEntityConfiguratorExtensions
         bookBuilder.Property(x => x.Id).ValueGeneratedNever().IsRequired();
 
         bookBuilder.HasMany(x => x.Authors).WithMany(x => x.Books);
+        bookBuilder.Navigation(x => x.Publisher).AutoInclude();
 
         return bookBuilder;
     }

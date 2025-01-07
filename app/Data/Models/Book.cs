@@ -7,12 +7,7 @@ public sealed class Book : IBookstoreModel
     public string Edition { get; set; }
     public double Price { get; set; }
 
-    Publisher? _publisher = null;
-    public Publisher Publisher
-    {
-        get => _publisher ?? Publisher.Default;
-        set => _publisher = value;
-    }
+    public Publisher? Publisher { get; set; }
 
     readonly List<Author> _authors = [];
     public IEnumerable<Author> Authors
@@ -46,7 +41,7 @@ public sealed class Book : IBookstoreModel
         return ha && hb;
     }
 
-    public void UnsetPublisher() => _publisher = null;
+    public void UnsetPublisher() => Publisher = null;
 
     public void AddAuthors(IEnumerable<Author> authors)
     {

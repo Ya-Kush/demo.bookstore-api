@@ -6,9 +6,13 @@ public static class PublisherEndpointsMapping
     {
         var group = routeBuilder.MapGroup("/publishers").WithTags("Publisher");
 
-        group.MapGet("", GetPublishers.Handle).WithName(nameof(GetPublisher));
-        group.MapGet("/{publisherId:guid}", GetPublisher.Handle).WithName(nameof(GetPublishers));
-        group.MapGet("/{publisherId:guid}/books", GetPublisherBooks.Handle).WithName(nameof(GetPublisherBooks));
+        var publisherId = "{publisherId:guid}";
+        var bookId = "{bookId}";
+
+        group.Map("").With<GetPublishers,PostPublisher>();
+        group.Map($"/{publisherId}").With<GetPublisher,PatchPublisher,DeletePublisher>();
+        group.Map($"/{publisherId}/books").With<GetPublisherBooks>();
+        group.Map($"/{publisherId}/books/{bookId}").With<PutPublisherBook,DeletePublisherBook>();
 
         return group;
     }

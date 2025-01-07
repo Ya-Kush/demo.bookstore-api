@@ -7,24 +7,13 @@ public sealed class Publisher : IBookstoreModel
 {
     public Guid Id { get; }
 
-    string _name;
-    public string Name
-    {
-        get => _name;
-        set
-        {
-            if (Id == Guid.Empty) throw new InvalidOperationException("Attempt to change property of a readonly object");
-            _name = value;
-        }
-    }
+    public string Name { get; set; }
 
     readonly List<Book> _books = [];
     public IEnumerable<Book> Books => _books;
 
-    public readonly static Publisher Default = new(Guid.Empty, "Unknown");
-
     internal Publisher(Guid id, string name)
-        => (Id, _name) = (id, name);
+        => (Id, Name) = (id, name);
 
     public static Res<Publisher> New(string name)
         => name.IsNullOrWhiteSpace()
@@ -53,9 +42,8 @@ public sealed class Publisher : IBookstoreModel
     }
     public void AddBook(Book book)
     {
-        if (_books.Any(b => b.Id == book.Id)) return;
-
-        _books.Add(book);
+        if (_books.Any(b => b.Id == book.Id) is false)
+            _books.Add(book);
         book.Publisher = this;
     }
 
@@ -65,9 +53,8 @@ public sealed class Publisher : IBookstoreModel
     }
     public void RemoveBook(Book book)
     {
-        if (_books.All(x => x.Id != book.Id)) return;
-
-        _books.Remove(book);
+        if (_books.Any(x => x.Id == book.Id))
+            _books.Remove(book);
         book.UnsetPublisher();
     }
 }

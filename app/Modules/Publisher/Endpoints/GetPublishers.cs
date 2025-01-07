@@ -1,16 +1,36 @@
 using App.Data;
+using App.Data.Extensions;
 using App.Endpoints.Models;
 using App.Endpoints.Services;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using static Microsoft.AspNetCore.Http.TypedResults;
 
 namespace App.Endpoints;
 
-public static class GetPublishers
+public sealed class GetPublishers : IGetEndpoint
 {
-    public readonly record struct Response(IEnumerable<SimplePublisherResponse> Data);
+    readonly record struct GetPublishersItem(FlatPublisher Publisher, Link[] Links, Act[] Acts);
+    readonly record struct GetPublishersResponse(IEnumerable<GetPublishersItem> Data, Act[] Acts);
 
-    public static IResult Handle(BookstoreDbContext db, EndpointContext context)
+    public Delegate Handler => Handle;
+
+    async Task<Ok<GetPublishersResponse>> Handle(BookstoreDbContext db, EndpointContext context)
     {
-        return Ok(new Response(db.Publishers.ToSimplePublisherResponses(context)));
+        var data = await db.Publishers.Untrack().ToArrayAsync();
+
+        return Ok(new GetPublishersResponse(
+            Data: data.Select(pub => new GetPublishersItem
+            {
+                Publisher = pub.ToFlat(),
+                Links = pub.GetLinks(context),
+                Acts = pub.GetActs(context)
+            }),
+            Acts:
+            [
+                new(Rel: "add_new",
+                    Method: Act.Methods.POST,
+                    Href: context.GetLinkBy<PostPublisher>()),
+            ]));
     }
 }
