@@ -1,3 +1,5 @@
+using App.Common;
+
 namespace App.Data.Models;
 
 public sealed class Author : IBookstoreModel
@@ -17,8 +19,8 @@ public sealed class Author : IBookstoreModel
     internal Author(Guid id, string firstName, string middleName, string lastName)
         => (Id, FirstName, MiddleName, LastName) = (id, firstName, middleName, lastName);
 
-    public static Author New(string firstName, string middleName, string lastName)
-        => new(Guid.NewGuid(), firstName, middleName, lastName);
+    public static Res<Author> New(string firstName, string middleName, string lastName)
+        => new Author(Guid.NewGuid(), firstName, middleName, lastName);
 
     public Author WithBooks(IEnumerable<Book> books)
     {

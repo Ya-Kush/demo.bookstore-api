@@ -1,5 +1,6 @@
 using App.Data;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static Microsoft.AspNetCore.Http.TypedResults;
 
@@ -9,9 +10,6 @@ public sealed class DeletePublisher : IDeleteEndpoint
 {
     public Delegate Handler => Handle;
 
-    async Task<Results<Ok,NotFound>> Handle(Guid publisherId, BookstoreDbContext db)
-    {
-        var deletedCount = await db.Publishers.Where(p => p.Id == publisherId).ExecuteDeleteAsync();
-        return deletedCount == 0 ? NotFound() : Ok();
-    }
+    async Task<Results<Ok,NotFound>> Handle([FromRoute]Guid publisherId, BookstoreDbContext db, CancellationToken cancel)
+        => await db.Publishers.Where(p => p.Id == publisherId).ExecuteDeleteAsync(cancel) is 0 ? NotFound() : Ok();
 }

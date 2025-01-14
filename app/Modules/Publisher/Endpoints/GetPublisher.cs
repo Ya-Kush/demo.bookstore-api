@@ -1,5 +1,6 @@
 using App.Data;
 using App.Data.Extensions;
+using App.Endpoints.HypermediaPrimitives;
 using App.Endpoints.Models;
 using App.Endpoints.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -10,20 +11,17 @@ namespace App.Endpoints;
 
 public sealed class GetPublisher : IGetEndpoint
 {
-    readonly record struct GetPublisherResponse(FlatPublisher Data, Link[] Links, Act[] Acts);
-
     public Delegate Handler => Handle;
 
-    async Task<Results<Ok<GetPublisherResponse>,NotFound>> Handle(Guid publisherId, BookstoreDbContext db, EndpointContext context)
+    async Task<Results<Ok<Item<PlainPublisher>>,NotFound>> Handle(Guid publisherId, BookstoreDbContext db, EndpointContext context, CancellationToken cancel)
     {
-        var pub = await db.Publishers.Untrack().FirstOrDefaultAsync(p => p.Id == publisherId);
+        var pub = await db.Publishers.AsNoTracking().FirstOrDefaultAsync(p => p.Id == publisherId, cancel);
 
-        return pub is null ? NotFound()
-            : Ok(new GetPublisherResponse
-            {
-                Data = pub.ToFlat(),
-                Links = pub.GetLinks(context),
-                Acts = pub.GetActs(context)
-            });
+        return pub is null
+            ? NotFound()
+            : Ok(Item.New(
+                links: pub.GetLinks(context),
+                acts: pub.GetActs(context),
+                props: pub.ToPlain()));
     }
 }

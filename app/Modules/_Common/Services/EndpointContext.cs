@@ -15,7 +15,7 @@ public class EndpointContext(IHttpContextAccessor hca, LinkGenerator lg)
         => LinkGenerator.GetUriByName(HttpContext, handler.GetMethodInfo().Name, values)
         ?? throw new Exception("Uri Couldn't Be Generated");
 
-    public string GetLinkBy<T>(object? values = null) where T : IEndpoint
+    public string GetLinkFor<T>(object? values = null) where T : IEndpoint
         => LinkGenerator.GetUriByName(HttpContext, typeof(T).Name, values)
         ?? throw new Exception("Uri Couldn't Be Generated");
 }

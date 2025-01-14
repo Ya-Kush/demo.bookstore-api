@@ -30,7 +30,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger().UseSwaggerUI();
 }
 
-app.MapBookstoreEndpoints("/api/v1");
+app.MapGroup("/api/v1").MapBookstoreEndpoints();
+#endregion Application Configuration
+
+app.Map("", (IEnumerable<EndpointDataSource> sources) =>
+    sources.Select(s => new
+    {
+        dataSource = s.GetType().Name,
+        endpoints = s.Endpoints.Select(e => e.DisplayName)
+    }));
 
 app.Run();
-#endregion Application Configuration

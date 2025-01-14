@@ -6,27 +6,19 @@ namespace App.Endpoints;
 
 public static class BookstoreEndpointsConfigurator
 {
-    /// <summary>
-    /// Add <see cref="IHttpContextAccessor"/>, scoped <see cref="EndpointContext"/>
-    /// and repos for <see cref="Author"/> and for <see cref="Book"/>.
-    /// </summary>
     public static void AddBookstoreEndpointServices(this IServiceCollection services)
     {
         services.AddHttpContextAccessor();
         services.AddScoped<EndpointContext>();
-        services.AddScoped<AuthorRepo>();
-        services.AddScoped<BookRepo>();
     }
 
-    public static RouteGroupBuilder MapBookstoreEndpoints(this IEndpointRouteBuilder routeBuilder, [StringSyntax("Route")] string prefix)
+    public static T MapBookstoreEndpoints<T>(this T builder) where T : IEndpointRouteBuilder
     {
-        var group = routeBuilder.MapGroup(prefix).WithTags("Api");
+        builder.MapAuthors();
+        builder.MapBooks();
+        builder.MapPublishers();
 
-        group.MapAuthors();
-        group.MapBooks();
-        group.MapPublishers();
-
-        return group;
+        return builder;
     }
 
     static void AddDerivates<T>(this IServiceCollection services, bool withBase)

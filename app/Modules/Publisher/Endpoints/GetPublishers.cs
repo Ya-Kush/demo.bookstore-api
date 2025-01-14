@@ -1,5 +1,7 @@
 using App.Data;
 using App.Data.Extensions;
+using App.Data.Models;
+using App.Endpoints.HypermediaPrimitives;
 using App.Endpoints.Models;
 using App.Endpoints.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -10,27 +12,29 @@ namespace App.Endpoints;
 
 public sealed class GetPublishers : IGetEndpoint
 {
-    readonly record struct GetPublishersItem(FlatPublisher Publisher, Link[] Links, Act[] Acts);
-    readonly record struct GetPublishersResponse(IEnumerable<GetPublishersItem> Data, Act[] Acts);
-
     public Delegate Handler => Handle;
 
-    async Task<Ok<GetPublishersResponse>> Handle(BookstoreDbContext db, EndpointContext context)
+    async Task<Ok<Set<PlainPublisher>>> Handle(BookstoreDbContext db, EndpointContext context, CancellationToken cancel)
     {
-        var data = await db.Publishers.Untrack().ToArrayAsync();
+        var pubs = await db.Publishers.AsNoTracking().ToArrayAsync(cancel);
 
-        return Ok(new GetPublishersResponse(
-            Data: data.Select(pub => new GetPublishersItem
-            {
-                Publisher = pub.ToFlat(),
-                Links = pub.GetLinks(context),
-                Acts = pub.GetActs(context)
-            }),
-            Acts:
-            [
-                new(Rel: "add_new",
-                    Method: Act.Methods.POST,
-                    Href: context.GetLinkBy<PostPublisher>()),
-            ]));
+        Act[] acts = [new(
+            Name: "add_new",
+            Method: Act.Methods.POST,
+            Href: context.GetLinkFor<PostPublisher>(),
+            Fields: [new("name", "string")])];
+
+        return Ok(pubs.ToSet(
+            converter: pub => Converter(pub, context),
+            links: [],
+            acts: acts
+        ));
     }
+
+    static Item<PlainPublisher> Converter(Publisher pub, EndpointContext context)
+        => Item.New(
+            links: pub.GetLinks(context),
+            acts: pub.GetActs(context),
+            props: pub.ToPlain()
+        );
 }

@@ -11,13 +11,15 @@ public sealed class PatchPublisher : IPatchEndpoint
 
     public Delegate Handler => Handle;
 
-    async Task<Results<Ok,BadRequest>> Handle(Guid publisherId, PatchPublisherRequest req, BookstoreDbContext db)
+    async Task<Results<Ok,BadRequest>> Handle(Guid publisherId, PatchPublisherRequest req, BookstoreDbContext db, CancellationToken cancel)
     {
-        var pub = await db.Publishers.FirstOrDefaultAsync(p => p.Id == publisherId);
+        var pub = await db.Publishers.FirstOrDefaultAsync(p => p.Id == publisherId, cancel);
         if (pub is null) return BadRequest();
 
-        if (req.Name is not null) pub.Name = req.Name;
-        await db.SaveChangesAsync();
+        if (req.Name is not null)
+            if (req.Name is "") return BadRequest();
+            else pub.Name = req.Name;
+        await db.SaveChangesAsync(cancel);
 
         return Ok();
     }

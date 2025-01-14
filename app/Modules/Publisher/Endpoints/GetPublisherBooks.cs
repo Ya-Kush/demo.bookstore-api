@@ -1,5 +1,7 @@
 using App.Data;
 using App.Data.Extensions;
+using App.Data.Models;
+using App.Endpoints.HypermediaPrimitives;
 using App.Endpoints.Models;
 using App.Endpoints.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -10,21 +12,31 @@ namespace App.Endpoints;
 
 public sealed class GetPublisherBooks : IGetEndpoint
 {
-    readonly record struct GetPublisherBooksItem(FlatPublisherBook Book, Link[] Links, Act[] Acts);
-    readonly record struct GetPublisherBooksResponse(IEnumerable<GetPublisherBooksItem> Data);
-
     public Delegate Handler => Handle;
 
-    async Task<Results<Ok<GetPublisherBooksResponse>,NotFound>> Handle(Guid publisherId, BookstoreDbContext db, EndpointContext context)
+    async Task<Results<Ok<Set<PlainPublisherBook>>,NotFound>> Handle(Guid publisherId, BookstoreDbContext db, EndpointContext context, CancellationToken cancel)
     {
-        var pub = await db.Publishers.Untrack().Include(p => p.Books).FirstOrDefaultAsync(p => p.Id == publisherId);
+        var pub = await db.Publishers.AsNoTracking().Include(p => p.Books).FirstOrDefaultAsync(p => p.Id == publisherId, cancel);
+        if (pub is null) return NotFound();
 
-        return pub is null ? NotFound()
-            : Ok(new GetPublisherBooksResponse(pub.Books.Select(b => new GetPublisherBooksItem
-            {
-                Book = new(b.Id, b.Title, b.Edition, b.Price),
-                Links = b.GetLinks(context),
-                Acts = b.GetPublishersActs(pub, context)
-            })));
+        object publisherIdValues = new { publisherId };
+        Act[] acts = [new(
+            Name: "add_book",
+            Method: Act.Methods.POST,
+            Href: context.GetLinkFor<PostPublisherBook>(publisherIdValues),
+            Fields: [new("bookId", "guid")])];
+
+        return Ok(pub.Books.ToSet(
+                converter: b => Converter(b, context, pub),
+                links: [new("self", context.GetLinkFor<GetPublisherBooks>(publisherIdValues))],
+                acts: acts
+        ));
     }
+
+    static Item<PlainPublisherBook> Converter(Book b, EndpointContext context, Publisher pub)
+        => Item.New(
+            links: b.GetLinks(context),
+            acts: b.GetPublishersActs(pub, context),
+            props: b.ToPublisherPlain()
+        );
 }

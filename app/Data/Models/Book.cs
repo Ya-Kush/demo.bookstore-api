@@ -1,3 +1,5 @@
+using App.Common;
+
 namespace App.Data.Models;
 
 public sealed class Book : IBookstoreModel
@@ -19,7 +21,7 @@ public sealed class Book : IBookstoreModel
     internal Book(Guid id, string title, string edition, double price)
         => (Id, Title, Edition, Price) = (id, title, edition, price);
 
-    public static Book New(string title, string edition, double price, Publisher? publisher = null)
+    public static Res<Book> New(string title, string edition, double price, Publisher? publisher = null)
     {
         var book = new Book(Guid.NewGuid(), title, edition, price);
         if (publisher is not null) book.Publisher = publisher;
