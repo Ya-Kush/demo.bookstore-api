@@ -1,24 +1,32 @@
+using App.Configuring;
 using App.Data;
 using App.Handlers.Mapping;
 using App.Middlewares;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder(args);
+var bldr = WebApplication.CreateBuilder(args);
+var conf = bldr.Configuration;
+var env = bldr.Environment;
 
-var srvs = builder.Services;
+var srvs = bldr.Services;
 {
     srvs.AddProblemDetails();
     srvs.AddExceptionHandler<GlobalExceptionHandlingMiddleware>();
+
+    srvs.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, opts => opts.Configure(conf, env));
+    srvs.AddAuthorization();
 
     srvs.AddDbContext<BookstoreDbContext>(opts => opts.UseInMemoryDatabase("Bookstore"));
     srvs.AddBookstoreEndpointServices();
 
     srvs.AddEndpointsApiExplorer();
-    srvs.AddSwaggerGen();
+    srvs.AddSwaggerGen(opts => opts.Configure());
 }
 
 
-var app = builder.Build();
+var app = bldr.Build();
 {
     app.UseExceptionHandler();
 
@@ -30,7 +38,12 @@ var app = builder.Build();
         app.UseSwaggerUI();
     }
 
-    app.MapGroup("/api/v1").MapBookstoreEndpoints();
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+    app.MapGroup("/api/v1")
+        .MapBookstoreEndpoints()
+        .RequireAuthorization();
 
     app.Run();
 }

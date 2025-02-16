@@ -3,14 +3,14 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <WarningsNotAsErrors>CS1030</WarningsNotAsErrors>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>23b913b8-a7be-451a-9a0d-b0e63db1b1b3</UserSecretsId>
+    <UserSecretsId>c59f0a2b-c064-4083-9614-c563a80668fb</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Bogus" Version="35.*" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.*" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.*" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.*" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.*" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.*" />

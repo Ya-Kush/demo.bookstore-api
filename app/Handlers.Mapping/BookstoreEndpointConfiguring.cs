@@ -5,7 +5,7 @@ using App.Handlers.Services;
 
 namespace App.Handlers.Mapping;
 
-public static class BookstoreConfigurating
+public static class BookstoreConfiguring
 {
     public static void AddBookstoreEndpointServices(this IServiceCollection services)
     {
