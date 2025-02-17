@@ -1,0 +1,24 @@
+# Learn about building .NET container images:
+# https://github.com/dotnet/dotnet-docker/blob/main/samples/README.md
+
+ARG TAG=8.0-alpine
+
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:$TAG AS build
+ARG CONFIGURATION=Release
+ARG TARGETARCH
+WORKDIR /src
+# restore as distinct layers
+COPY auth/*.csproj .
+RUN dotnet restore -a $TARGETARCH
+# publish app and libraries
+COPY auth .
+RUN dotnet publish --no-restore --no-self-contained -c $CONFIGURATION -a $TARGETARCH -o /app
+
+# Enable globalization and time zones:
+# https://github.com/dotnet/dotnet-docker/blob/main/samples/enable-globalization.md
+# final stage/image
+FROM mcr.microsoft.com/dotnet/aspnet:$TAG
+WORKDIR /app
+COPY --from=build /app .
+USER $APP_UID
+ENTRYPOINT ["dotnet", "auth.dll"]

@@ -1,0 +1,41 @@
+name: bookstore
+
+services:
+  auth:
+    image: bookstore.auth
+    build:
+      context: .
+      dockerfile: Dockerfile.auth
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "5000:8080"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/.microsoft/usersecrets:ro
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1536m
+    # develop:
+    #   watch:
+    #     - action: sync+restart
+    #       path: auth/appsettings*.json
+    #       target: app/appsettings*.json
+
+  store:
+    image: bookstore.store
+    build:
+      context: .
+      dockerfile: Dockerfile.store
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "5001:8080"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/.microsoft/usersecrets:ro
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1536m
