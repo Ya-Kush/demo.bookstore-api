@@ -13,13 +13,8 @@ static class JwtBearerOptionsConfiguring
         {
             ValidIssuer = conf["Jwt:Issuer"],
             ValidAudience = conf["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(conf["Jwt:Secret"]!)), // RsaSecurityKey
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(conf["Jwt:Key"]!)), // RsaSecurityKey
             ValidateIssuerSigningKey = true
-
-            // Default:
-            // ValidateIssuer = true,
-            // ValidateAudience = true,
-            // ValidateLifetime = true,
         };
     }
 }

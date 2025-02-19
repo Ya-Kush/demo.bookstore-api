@@ -3,6 +3,7 @@ using Auth.Data;
 using Auth.Extensions;
 using Auth.Handlers;
 using Auth.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,13 +17,10 @@ var srvs = bldr.Services;
     srvs.AddHttpContextAccessor();
     srvs.AddProblemDetails();
 
-    srvs.AddScoped<JwtBearerGeneration>();
-
-    srvs.AddAuthentication(IdentityConstants.BearerScheme)
-        .AddJwtBearer(IdentityConstants.BearerScheme, opts => opts.Configure(conf, env));
+    srvs.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, opts => opts.Configure(conf, env));
     srvs.AddAuthorization();
 
-    srvs.AddDbContext<UserContext>(opts => opts.UseInMemoryDatabase("Users"));
     srvs.AddIdentityCore<User>(opts =>
         {
             opts.User.RequireUniqueEmail = true;
@@ -30,11 +28,11 @@ var srvs = bldr.Services;
             opts.Stores.MaxLengthForKeys = Guid.Empty.ToString().Length;
             // opts.Stores.ProtectPersonalData = true;
         })
-        .AddEntityFrameworkStores<UserContext>()
-        .AddSignInManager()
-        // .AddTokenProvider<>()
-        // .AddDefaultTokenProviders()
-        ;
+        .AddEntityFrameworkStores<UserContext>(opts => opts.UseInMemoryDatabase("Users"))
+        .AddTokenProvider<JwtBearerTokenProvider>(JwtBearerTokenProvider.ProviderName)
+        .AddTokenProvider<RefreshTokenProvider>(RefreshTokenProvider.ProviderName)
+        .AddUserManager<UserManager>()
+        .AddDefaultTokenProviders();
 
     srvs.AddEndpointsApiExplorer();
     srvs.AddSwaggerGen(opts => opts.Configure());
@@ -56,6 +54,7 @@ var app = bldr.Build();
         {
             if (env.IsDevelopment())
                 group.MapPost("/super-login", Account.SuperLogIn);
+
             group.MapGet("/claims", Claims.Get).RequireAuthorization();
             group.MapPost("/register", Account.Register);
             group.MapPost("/login", Account.LogIn);

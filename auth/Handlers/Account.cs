@@ -1,7 +1,5 @@
 using Auth.Data;
 using Auth.Services;
-using Microsoft.AspNetCore.Authentication.BearerToken;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,12 +9,15 @@ namespace Auth.Handlers;
 
 sealed class Account
 {
-    static readonly string _authScheme = IdentityConstants.BearerScheme;
+    public readonly record struct JwtAndRefreshResponse(string AccessToken, string RefreshToken){ public string Type { get; } = bearerProvider; }
+
+    static readonly string bearerProvider = JwtBearerTokenProvider.ProviderName;
+    static readonly string defaultProvider = TokenOptions.DefaultProvider;
+
 
     public readonly record struct RegisterRequest(string? UserName, string Email, string Password);
-    public static async Task<Results<Ok<JwtBearerToken>, ValidationProblem, EmptyHttpResult>> Register([FromBody]RegisterRequest req, SignInManager<User> sim, [FromServices]JwtBearerGeneration jwtGen)
+    public static async Task<Results<Ok<JwtAndRefreshResponse>, ValidationProblem, EmptyHttpResult>> Register([FromBody]RegisterRequest req, UserManager um)
     {
-        var um = sim.UserManager;
         var (userName, email, password) = req;
 
         var user = await um.FindByEmailAsync(email);
@@ -26,33 +27,40 @@ sealed class Account
         var iRes = await um.CreateAsync(user, password);
         if (iRes.Succeeded is false) return ValidationProblem(iRes.Errors.Select(e => new KeyValuePair<string, string[]>(e.Code, [e.Description])).ToDictionary());
 
-        // sim.AuthenticationScheme = _authScheme;
-        // await sim.SignInAsync(user, false, _authScheme);
-        // return Empty;
-        return Ok(await jwtGen.CreateAsync(user));
+        return Ok(await CreateTokensRespone(user, um));
     }
 
-    public static async Task<Ok<JwtBearerToken>> SuperLogIn(SignInManager<User> sim, [FromServices]JwtBearerGeneration jwtGen)
+    public static async Task<Ok<JwtAndRefreshResponse>> SuperLogIn(UserManager um)
     {
-        var su = (await sim.UserManager.FindByNameAsync("SuperUser"))!;
-        var token = await jwtGen.CreateAsync(su);
-        return Ok(token);
+        var user = (await um.FindByNameAsync("SuperUser"))!;
+        return Ok(await CreateTokensRespone(user, um));
     }
 
     public readonly record struct LogInRequest(string Email, string Password);
-    public static async Task<Results<Ok, BadRequest, EmptyHttpResult>> LogIn(LogInRequest req, SignInManager<User> sim)
+    public static async Task<Results<Ok<JwtAndRefreshResponse>, BadRequest, EmptyHttpResult>> LogIn(LogInRequest req, UserManager um)
     {
-        var u = await sim.UserManager.FindByEmailAsync(req.Email);
-        if (u is null) return BadRequest();
+        var (email, password) = req;
+        var user = await um.FindByEmailAsync(email);
+        if (user is null) return BadRequest();
 
-        var res = await sim.PasswordSignInAsync(u, req.Password, false, false);
-        if (res.Succeeded is false) return BadRequest();
+        var irs = await Task.WhenAll(um.PasswordValidators.Select(v => v.ValidateAsync(um, user, password)));
 
-        return Empty;
+        return irs.All(v => v.Succeeded) ? Ok(await CreateTokensRespone(user, um))
+            : BadRequest();
     }
 
-    public static async Task Refresh([FromBody]string refreshToken, SignInManager<User> sim)
+    public static async Task<Results<Ok<JwtAndRefreshResponse>, BadRequest, EmptyHttpResult>> Refresh([FromBody]string refreshToken, UserManager um)
     {
-        throw new NotImplementedException();
+        var user = await um.FindByRefreshTokenAsync(refreshToken);
+        return user is null ? BadRequest()
+            : Ok(await CreateTokensRespone(user, um));
+    }
+
+    static async Task<JwtAndRefreshResponse> CreateTokensRespone(User user, UserManager um)
+    {
+        var accessToken = await um.GenerateJwtBearerAccessToken(user);
+        var refreshToken = await um.GenerateUpdatedRefreshTokenAsync(user);
+
+        return new(accessToken, refreshToken);
     }
 }

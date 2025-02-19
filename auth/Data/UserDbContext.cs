@@ -3,4 +3,4 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Auth.Data;
 
-sealed class UserContext(DbContextOptions<UserContext> options) : IdentityUserContext<User, Guid>(options);
+public sealed class UserContext(DbContextOptions<UserContext> options) : IdentityUserContext<User, Guid>(options);
