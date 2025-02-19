@@ -17,7 +17,8 @@ public sealed class UserManager(
         ILookupNormalizer keyNormalizer,
         IdentityErrorDescriber errors,
         IServiceProvider services,
-        ILogger<UserManager<User>> logger) : UserManager<User>(store, optionsAccessor, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger)
+        ILogger<UserManager<User>> logger)
+        : UserManager<User>(store, optionsAccessor, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger)
 {
     static readonly string RefreshProviderName = RefreshTokenProvider.ProviderName;
     static readonly string RefreshLoginProviderName = RefreshProviderName + "LoginProbider";
@@ -30,12 +31,12 @@ public sealed class UserManager(
     public Task<string> GenerateJwtBearerAccessToken(User user)
         => GenerateUserTokenAsync(user, JwtBearerProviderName, string.Empty);
 
-    public Task<string> GenerateRefreshTokenAsync(User user, CancellationToken cancel = default)
+    public Task<string> GenerateRefreshTokenAsync(User user)
         => GenerateUserTokenAsync(user, RefreshProviderName, string.Empty);
 
     public async Task<string> GenerateUpdatedRefreshTokenAsync(User user, CancellationToken cancel = default)
     {
-        var token = await GenerateRefreshTokenAsync(user, cancel);
+        var token = await GenerateRefreshTokenAsync(user);
         await UpdateRefreshTokenAsync(user, token, cancel);
         return token;
     }
