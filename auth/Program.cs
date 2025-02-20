@@ -17,6 +17,7 @@ var srvs = bldr.Services;
     srvs.AddHttpContextAccessor();
     srvs.AddProblemDetails();
 
+    // srvs.Configure<JwtBearerOptions>(opts => opts.Configure(conf, env));
     srvs.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, opts => opts.Configure(conf, env));
     srvs.AddAuthorization();
@@ -52,10 +53,11 @@ var app = bldr.Build();
     app.MapGet("/", () => "Welcome to the auth service!").WithDisplayName("Greeting");
     app.MapGroup("api/account", group =>
         {
+            group.MapGet("/claims", Claims.Get).RequireAuthorization();
+
             if (env.IsDevelopment())
                 group.MapPost("/super-login", Account.SuperLogIn);
 
-            group.MapGet("/claims", Claims.Get).RequireAuthorization();
             group.MapPost("/register", Account.Register);
             group.MapPost("/login", Account.LogIn);
             group.MapPost("/refresh", Account.Refresh);

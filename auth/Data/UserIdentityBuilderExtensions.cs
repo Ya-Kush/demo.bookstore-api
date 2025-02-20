@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace Auth.Services;
+namespace Auth.Data;
 
 public static class UserIdentityBuilderExtensions
 {

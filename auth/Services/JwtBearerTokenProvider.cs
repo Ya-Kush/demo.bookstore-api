@@ -11,15 +11,15 @@ public sealed class JwtBearerTokenProvider(IConfiguration conf) : IUserTwoFactor
 {
     public static readonly string ProviderName = "Bearer";
 
+    public string Issuer => conf["Jwt:Issuer"] ?? throw new InvalidOperationException();
+    public string Audience => conf["Jwt:Audience"] ?? throw new InvalidOperationException();
+    SecurityKey SecurityKey => _securityKey ??= new SymmetricSecurityKey(Encoding.UTF8.GetBytes(conf["Jwt:Key"]!));
+    SecurityKey? _securityKey;
+
     public async Task<string> GenerateAsync(string _, UserManager<User> manager, User user)
     {
-        var secretKey = Encoding.UTF8.GetBytes(conf["Jwt:Key"]!);
-        var securityKey = new SymmetricSecurityKey(secretKey);
-
-        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
         var subject = new ClaimsIdentity(
         [
-            new(JwtRegisteredClaimNames.Email, user.Email!),
             new(JwtRegisteredClaimNames.Name, user.UserName!),
             ..await manager.GetClaimsAsync(user),
         ]);
@@ -29,39 +29,31 @@ public sealed class JwtBearerTokenProvider(IConfiguration conf) : IUserTwoFactor
             Subject = subject,
             IssuedAt = DateTime.UtcNow,
             Expires = DateTime.UtcNow.AddMinutes(15),
-            Issuer = conf["Jwt:Issuer"],
-            Audience = conf["Jwt:Audience"],
-            SigningCredentials = credentials,
+            Issuer = Issuer,
+            Audience = Audience,
+            SigningCredentials = new(SecurityKey, SecurityAlgorithms.HmacSha256),
         };
 
-        var jwtHandler = new JsonWebTokenHandler();
-
-        return jwtHandler.CreateToken(accessTokenDescriptor);
+        return new JsonWebTokenHandler().CreateToken(accessTokenDescriptor);
     }
 
     public async Task<bool> ValidateAsync(string purpose, string token, UserManager<User> manager, User user)
     {
         var data = token.Split('.').Select(Base64UrlEncoder.Decode).ToArray();
 
-        var jwtHandler = new JsonWebTokenHandler();
         var tvp = new TokenValidationParameters
         {
-            ValidIssuer = conf["Jwt:Issuer"],
-            ValidAudience = conf["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(conf["Jwt:Key"]!)),
+            ValidIssuer = Issuer,
+            ValidAudience = Audience,
+            IssuerSigningKey = SecurityKey,
             ValidateIssuerSigningKey = true
         };
-        var can = jwtHandler.CanValidateToken;
+
+        var jwtHandler = new JsonWebTokenHandler();
         var res = await jwtHandler.ValidateTokenAsync(token, tvp);
 
         return res.IsValid;
     }
 
     public Task<bool> CanGenerateTwoFactorTokenAsync(UserManager<User> manager, User user) => Task.FromResult(false);
-}
-
-public static class JwtBearerTokenProviderExtensions
-{
-    public static Task<string> GenerateJwtBearerAccessToken(this UserManager<User> manager, User user)
-        => manager.GenerateUserTokenAsync(user, JwtBearerTokenProvider.ProviderName, string.Empty);
 }

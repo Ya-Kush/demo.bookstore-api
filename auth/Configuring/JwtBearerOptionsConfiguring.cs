@@ -13,7 +13,7 @@ static class JwtBearerOptionsConfiguring
         {
             ValidIssuer = conf["Jwt:Issuer"],
             ValidAudience = conf["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(conf["Jwt:Key"]!)), // RsaSecurityKey
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(conf["Jwt:Key"]!)),
             ValidateIssuerSigningKey = true
         };
     }
