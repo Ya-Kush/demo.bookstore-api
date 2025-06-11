@@ -17,9 +17,13 @@ var srvs = bldr.Services;
     srvs.AddHttpContextAccessor();
     srvs.AddProblemDetails();
 
-    // srvs.Configure<JwtBearerOptions>(opts => opts.Configure(conf, env));
-    srvs.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, opts => opts.Configure(conf, env));
+    srvs.ConfigureOptions<ConfigureJwtBearerOptions>();
+    srvs.AddOptions<JwtOptions>()
+        .BindConfiguration(JwtOptions.SectionName)
+        .ValidateDataAnnotations()
+        .ValidateOnStart();
+
+    srvs.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
     srvs.AddAuthorization();
 
     srvs.AddIdentityCore<User>(opts =>
@@ -30,10 +34,10 @@ var srvs = bldr.Services;
             // opts.Stores.ProtectPersonalData = true;
         })
         .AddEntityFrameworkStores<UserContext>(opts => opts.UseInMemoryDatabase("Users"))
-        .AddTokenProvider<JwtBearerTokenProvider>(JwtBearerTokenProvider.ProviderName)
-        .AddTokenProvider<RefreshTokenProvider>(RefreshTokenProvider.ProviderName)
-        .AddUserManager<UserManager>()
-        .AddDefaultTokenProviders();
+        .AddDefaultTokenProviders()
+        .AddTokenProvider<JwtBearerTokenProvider>(JwtBearerTokenProvider.Name)
+        .AddTokenProvider<RefreshTokenProvider>(RefreshTokenProvider.Name)
+        .AddUserManager<UserManager>();
 
     srvs.AddEndpointsApiExplorer();
     srvs.AddSwaggerGen(opts => opts.Configure());

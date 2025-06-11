@@ -6,17 +6,17 @@ namespace Auth.Services;
 
 public sealed class RefreshTokenProvider(UserContext userContext, IServiceProvider services) : IUserTwoFactorTokenProvider<User>
 {
-    public static readonly string ProviderName = "Refresh";
+    public const string Name = "Refresh";
     public readonly UserContext UserContext = userContext;
     public readonly IServiceProvider Services = services;
 
     public async Task<string> GenerateAsync(string _, UserManager<User> manager, User user)
-        => await manager.GenerateUserTokenAsync(user, TokenOptions.DefaultProvider, _);
+        => await manager.GenerateUserTokenAsync(user, TokenOptions.DefaultProvider, Name);
 
-    public async Task<bool> ValidateAsync(string purpose, string token, UserManager<User> manager, User user)
+    public async Task<bool> ValidateAsync(string _, string token, UserManager<User> manager, User user)
     {
         var savedToken = await UserContext.UserTokens.AsNoTracking()
-            .FirstOrDefaultAsync(t => t.UserId == user.Id && t.Name == ProviderName);
+            .FirstOrDefaultAsync(t => t.UserId == user.Id && t.Name == Name);
 
         return savedToken?.Value == token;
     }

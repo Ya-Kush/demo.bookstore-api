@@ -17,22 +17,19 @@ public sealed class UserManager(
         ILookupNormalizer keyNormalizer,
         IdentityErrorDescriber errors,
         IServiceProvider services,
-        ILogger<UserManager<User>> logger)
-        : UserManager<User>(store, optionsAccessor, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger)
+        ILogger<UserManager<User>> logger
+    ) : UserManager<User>(store, optionsAccessor, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger)
 {
-    static readonly string RefreshProviderName = RefreshTokenProvider.ProviderName;
-    static readonly string RefreshLoginProviderName = RefreshProviderName + "LoginProvider";
-    static readonly string JwtBearerProviderName = JwtBearerTokenProvider.ProviderName;
+    const string LoginProbider = "Application";
+    const string RefreshProviderName = RefreshTokenProvider.Name;
+    const string JwtBearerProviderName = JwtBearerTokenProvider.Name;
 
     public new UserOnlyStore Store => (base.Store as object as UserOnlyStore)!;
     public UserContext Context => Store.Context;
 
 
-    public Task<string> GenerateJwtBearerAccessToken(User user)
-        => GenerateUserTokenAsync(user, JwtBearerProviderName, string.Empty);
-
-    public Task<string> GenerateRefreshTokenAsync(User user)
-        => GenerateUserTokenAsync(user, RefreshProviderName, string.Empty);
+    public async Task<string> GenerateJwtBearerTokenAsync(User user) => await GenerateUserTokenAsync(user, JwtBearerProviderName, string.Empty);
+    public async Task<string> GenerateRefreshTokenAsync(User user) => await GenerateUserTokenAsync(user, RefreshProviderName, string.Empty);
 
     public async Task<string> GenerateUpdatedRefreshTokenAsync(User user, CancellationToken cancel = default)
     {
@@ -44,12 +41,14 @@ public sealed class UserManager(
     public async Task<string> UpdateRefreshTokenAsync(User user, string token, CancellationToken cancel = default)
     {
         var userToken = await Context.UserTokens.FirstOrDefaultAsync(t => t.UserId == user.Id && t.Name == RefreshProviderName, cancel);
-        if (userToken is null) Context.Add(userToken = new()
-        {
-            UserId = user.Id,
-            LoginProvider = RefreshLoginProviderName,
-            Name = RefreshProviderName
-        });
+        if (userToken is null)
+            Context.Add(userToken = new()
+            {
+                UserId = user.Id,
+                LoginProvider = LoginProbider,
+                Name = RefreshProviderName,
+            });
+
         userToken.Value = token;
         await Context.SaveChangesAsync(cancel);
         return token;

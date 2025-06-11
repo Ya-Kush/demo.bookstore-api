@@ -11,7 +11,7 @@ sealed class Account
 {
     public readonly record struct JwtAndRefreshResponse(string AccessToken, string RefreshToken){ public string Type { get; } = bearerProvider; }
 
-    static readonly string bearerProvider = JwtBearerTokenProvider.ProviderName;
+    static readonly string bearerProvider = JwtBearerTokenProvider.Name;
     static readonly string defaultProvider = TokenOptions.DefaultProvider;
 
 
@@ -58,7 +58,7 @@ sealed class Account
 
     static async Task<JwtAndRefreshResponse> CreateTokensRespone(User user, UserManager um)
     {
-        var accessToken = await um.GenerateJwtBearerAccessToken(user);
+        var accessToken = await um.GenerateJwtBearerTokenAsync(user);
         var refreshToken = await um.GenerateUpdatedRefreshTokenAsync(user);
 
         return new(accessToken, refreshToken);
