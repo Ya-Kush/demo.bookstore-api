@@ -22,10 +22,10 @@ public static class BookstoreSeedingExtensions
     ];
     #endregion
 
-    public static WebApplication PopulateBookstore(this WebApplication app)
+    public static async Task<WebApplication> PopulateBookstoreAsync(this WebApplication app)
     {
-        using var scope = app.Services.CreateScope();
-        using var bookstore = scope.ServiceProvider.GetRequiredService<BookstoreDbContext>();
+        await using var scope = app.Services.CreateAsyncScope();
+        var bookstore = scope.ServiceProvider.GetRequiredService<BookstoreDbContext>();
 
         bookstore
             .PopulateWithAuthor()

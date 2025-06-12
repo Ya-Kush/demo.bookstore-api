@@ -30,7 +30,7 @@ var app = bldr.Build();
 {
     app.UseExceptionHandler();
 
-    app.PopulateBookstore();
+    await app.PopulateBookstoreAsync();
 
     if (app.Environment.IsDevelopment())
     {
